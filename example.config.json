@@ -1,4 +1,6 @@
 {
   "telegramKey": "",
-  "telegramBotOwner": 0
+  "telegramBotOwner": 0,
+  "bitmexPublicKey": "",
+  "bitmexPrivateKey": ""
 }

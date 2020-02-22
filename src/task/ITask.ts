@@ -1,12 +1,11 @@
-import { IStock } from '../stock/IStock';
-import { IWorker } from '../workers/IWorker';
+import { TStock, TWorker } from '../data/config';
 
 export type ITask = {
     active: boolean;
-    workerClass: IWorker;
-    worker: IWorker;
-    stockClass: IStock;
-    stock: IStock;
+    workerClass: new () => TWorker;
+    worker: TWorker;
+    stockClass: new () => TStock;
+    stock: TStock;
     amount: number;
     enter: number;
     stop: number;

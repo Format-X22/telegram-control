@@ -1,17 +1,17 @@
 import { ITask } from './ITask';
-import { stocks, workers } from '../data/config';
+import { stocks, TStock, TWorker, workers } from '../data/config';
 import { Bart } from '../workers/Bart';
 import { Zigzag } from '../workers/Zigzag';
 import { Telegram } from '../Telegram';
 
-export class TaskController {
-    private BART_TAKE_DISTANCE = 0.86;
-    private BART_STOP_DISTANCE = -0.86;
-    private ZIGZAG_DISTANCE = 2.8;
-    private BAD_MOVE_PERCENT = 0.2;
-    private ENTER_SAFE_MARGIN_PERCENT = 0.05;
-    private EXIT_TRIGGER_MARGIN_PERCENT = 0.15;
+const BART_TAKE_DISTANCE = 0.86;
+const BART_STOP_DISTANCE = -0.86;
+const ZIGZAG_DISTANCE = 2.8;
+const BAD_MOVE_PERCENT = 0.2;
+const ENTER_SAFE_MARGIN_PERCENT = 0.05;
+const EXIT_TRIGGER_MARGIN_PERCENT = 0.15;
 
+export class TaskController {
     private readonly tasks = [];
     private lastError = null;
 
@@ -47,8 +47,8 @@ export class TaskController {
         const amount: number = Number(data[1]);
         const enter: number = Number(data[2]);
         const stop: number = Number(data[3]);
-        const workerClass = workers[workerName];
-        const stockClass = stocks[stockName];
+        const workerClass: new () => TWorker = workers[workerName];
+        const stockClass: new () => TStock = stocks[stockName];
 
         if (!workerClass || !stockClass || [amount, enter, stop].some(v => !Number.isFinite(v))) {
             return null;
@@ -74,14 +74,14 @@ export class TaskController {
     private calcTask(task: ITask): ITask {
         if (task.workerClass === Bart) {
             task.exit = Math.round(
-                task.enter * (1 - (task.stop / task.enter - 1) * this.BART_TAKE_DISTANCE)
+                task.enter * (1 - (task.stop / task.enter - 1) * BART_TAKE_DISTANCE)
             );
             task.stop = Math.round(
-                task.enter * (1 - (task.stop / task.enter - 1) * this.BART_STOP_DISTANCE)
+                task.enter * (1 - (task.stop / task.enter - 1) * BART_STOP_DISTANCE)
             );
         } else if (task.workerClass === Zigzag) {
             task.exit = Math.round(
-                task.enter * (1 - (task.stop / task.enter - 1) * this.ZIGZAG_DISTANCE)
+                task.enter * (1 - (task.stop / task.enter - 1) * ZIGZAG_DISTANCE)
             );
         } else {
             return null;
@@ -89,25 +89,25 @@ export class TaskController {
 
         if (task.isLong) {
             task.exitAmount = Math.round(
-                -task.amount * (task.exit / task.enter - this.BAD_MOVE_PERCENT / 100)
+                -task.amount * (task.exit / task.enter - BAD_MOVE_PERCENT / 100)
             );
             task.stopAmount = Math.round(
-                -task.amount * (2 - (task.enter / task.stop + this.BAD_MOVE_PERCENT / 100))
+                -task.amount * (2 - (task.enter / task.stop + BAD_MOVE_PERCENT / 100))
             );
 
-            task.enter = Math.round(task.enter * (1 + this.ENTER_SAFE_MARGIN_PERCENT / 100));
-            task.exitTrigger = Math.round(task.exit * (1 - this.EXIT_TRIGGER_MARGIN_PERCENT / 100));
+            task.enter = Math.round(task.enter * (1 + ENTER_SAFE_MARGIN_PERCENT / 100));
+            task.exitTrigger = Math.round(task.exit * (1 - EXIT_TRIGGER_MARGIN_PERCENT / 100));
         } else {
             task.amount = Math.round(-task.amount);
             task.exitAmount = Math.round(
-                -task.amount * (task.exit / task.enter + this.BAD_MOVE_PERCENT / 100)
+                -task.amount * (task.exit / task.enter + BAD_MOVE_PERCENT / 100)
             );
             task.stopAmount = Math.round(
-                -task.amount * (2 - (task.enter / task.stop - this.BAD_MOVE_PERCENT / 100))
+                -task.amount * (2 - (task.enter / task.stop - BAD_MOVE_PERCENT / 100))
             );
 
-            task.enter = Math.round(task.enter * (1 - this.ENTER_SAFE_MARGIN_PERCENT / 100));
-            task.exitTrigger = Math.round(task.exit * (1 + this.EXIT_TRIGGER_MARGIN_PERCENT / 100));
+            task.enter = Math.round(task.enter * (1 - ENTER_SAFE_MARGIN_PERCENT / 100));
+            task.exitTrigger = Math.round(task.exit * (1 + EXIT_TRIGGER_MARGIN_PERCENT / 100));
         }
 
         return task;
