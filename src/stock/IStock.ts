@@ -1,24 +1,32 @@
-export type TStockOrderID = string;
-export type TStockLastSync = Date | null;
 export type TStockLastError = string | null;
 export type TStockPrice = number;
 export type TStockValue = number;
 
-export type TStockOrder = {
-    orderID: TStockOrderID;
-};
-
-export type TStockPosition = {
-    timestamp: string;
-    avgEntryPrice: number;
-    liquidationPrice: number;
-};
-
-export interface IStock {
+export interface IStock<TStockUserData, TStockPosition, TStockOrder, TStockOrderId> {
+    getUserData(): Promise<TStockUserData>;
     getPosition(): Promise<TStockPosition>;
     getOrders(): Promise<TStockOrder[]>;
-    placeOrder(price: TStockPrice, value: TStockValue): Promise<TStockOrder>;
-    cancelOrder(orderID: TStockOrderID): Promise<unknown>;
-    hasOrder(orderID: TStockOrderID): Promise<boolean>;
+    placeLimitOrder(price: TStockPrice, value: TStockValue): Promise<TStockOrder>;
+    placeMarketOrder(price: TStockPrice, value: TStockValue): Promise<TStockOrder>;
+    placeStopLimitOrder(
+        price: TStockPrice,
+        trigger: TStockPrice,
+        value: TStockValue
+    ): Promise<TStockOrder>;
+    placeStopMarketOrder(
+        trigger: TStockPrice,
+        value: TStockValue
+    ): Promise<TStockOrder>;
+    placeTakeLimitOrder(
+        price: TStockPrice,
+        trigger: TStockPrice,
+        value: TStockValue
+    ): Promise<TStockOrder>;
+    placeTakeMarketOrder(
+        trigger: TStockPrice,
+        value: TStockValue
+    ): Promise<TStockOrder>;
+    cancelOrder(orderID: TStockOrderId): Promise<unknown>;
+    hasOrder(orderID: TStockOrderId): Promise<boolean>;
     getLastError(): TStockLastError;
 }

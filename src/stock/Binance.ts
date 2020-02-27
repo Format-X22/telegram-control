@@ -1,16 +1,24 @@
-import {
-    IStock,
-    TStockLastError,
-    TStockOrder,
-    TStockOrderID,
-    TStockPosition,
-    TStockPrice,
-    TStockValue,
-} from './IStock';
+import { IStock, TStockLastError, TStockPrice, TStockValue } from './IStock';
 
-export class Binance implements IStock {
+type TStockOrderId = string;
+type TStockOrder = {
+    // TODO -
+};
+type TStockPosition = {
+    // TODO -
+};
+type TStockUserData = {
+    // TODO -
+};
+
+export class Binance implements IStock<TStockUserData, TStockPosition, TStockOrder, TStockOrderId> {
     constructor() {
         // TODO -
+    }
+
+    async getUserData(): Promise<TStockUserData> {
+        // TODO -
+        return;
     }
 
     async getPosition(): Promise<TStockPosition> {
@@ -23,17 +31,56 @@ export class Binance implements IStock {
         return;
     }
 
-    async placeOrder(price: TStockPrice, value: TStockValue): Promise<TStockOrder> {
+    async placeLimitOrder(price: TStockPrice, value: TStockValue): Promise<TStockOrder> {
         // TODO -
         return;
     }
 
-    async cancelOrder(orderID: TStockOrderID): Promise<unknown> {
+    async placeMarketOrder(price: TStockPrice, value: TStockValue): Promise<TStockOrder> {
         // TODO -
         return;
     }
 
-    async hasOrder(orderID: TStockOrderID): Promise<boolean> {
+    async placeStopLimitOrder(
+        price: TStockPrice,
+        trigger: TStockPrice,
+        value: TStockValue
+    ): Promise<TStockOrder> {
+        // TODO -
+        return;
+    }
+
+    async placeStopMarketOrder(
+        trigger: TStockPrice,
+        value: TStockValue
+    ): Promise<TStockOrder> {
+        // TODO -
+        return;
+    }
+
+    async placeTakeLimitOrder(
+        price: TStockPrice,
+        trigger: TStockPrice,
+        value: TStockValue
+    ): Promise<TStockOrder> {
+        // TODO -
+        return;
+    }
+
+    async placeTakeMarketOrder(
+        trigger: TStockPrice,
+        value: TStockValue
+    ): Promise<TStockOrder> {
+        // TODO -
+        return;
+    }
+
+    async cancelOrder(orderID: TStockOrderId): Promise<unknown> {
+        // TODO -
+        return;
+    }
+
+    async hasOrder(orderID: TStockOrderId): Promise<boolean> {
         // TODO -
         return;
     }

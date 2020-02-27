@@ -2,15 +2,26 @@ import * as crypto from 'crypto';
 import * as request from 'request-promise-native';
 import { EventLoop } from '../utils/EventLoop';
 import { config } from '../data/config';
-import {
-    IStock,
-    TStockOrder,
-    TStockOrderID,
-    TStockPosition,
-    TStockLastError,
-    TStockPrice,
-    TStockValue,
-} from './IStock';
+import { IStock, TStockLastError, TStockPrice, TStockValue } from './IStock';
+
+type TStockOrderId = string;
+type TStockOrder = {
+    type: string;
+    orderQty: number;
+    orderID?: TStockOrderId;
+    symbol?: string;
+    timeInForce?: string;
+    execInst?: string;
+    ordType?: string;
+    price?: number;
+    stopPx?: number;
+};
+type TStockPosition = {
+    // TODO -
+};
+type TStockUserData = {
+    // TODO -
+};
 
 type TAuthHeaders = {
     'content-type': 'application/json';
@@ -40,7 +51,7 @@ const REQUEST_RETRY_SLEEP: number = 3000;
 export const ONE_SECOND: number = 1000;
 export const MINUTE_IN_SECONDS: number = 60;
 
-export class Bitmex implements IStock {
+export class Bitmex implements IStock<TStockUserData, TStockPosition, TStockOrder, TStockOrderId> {
     private lastError?: TStockLastError;
     private readonly publicKey: string;
     private readonly privateKey: string;
@@ -48,6 +59,11 @@ export class Bitmex implements IStock {
     constructor() {
         this.publicKey = config.bitmexPublicKey;
         this.privateKey = config.bitmexPrivateKey;
+    }
+
+    async getUserData(): Promise<TStockUserData> {
+        // TODO -
+        return;
     }
 
     async getPosition(): Promise<TStockPosition> {
@@ -68,24 +84,58 @@ export class Bitmex implements IStock {
         });
     }
 
-    async placeOrder(price: TStockPrice, value: TStockValue): Promise<TStockOrder> {
-        // TODO Order types?
+    async placeLimitOrder(price: TStockPrice, value: TStockValue): Promise<TStockOrder> {
+        // TODO -
+        return;
+    }
 
+    async placeMarketOrder(price: TStockPrice, value: TStockValue): Promise<TStockOrder> {
+        // TODO -
+        return;
+    }
+
+    async placeStopLimitOrder(
+        price: TStockPrice,
+        trigger: TStockPrice,
+        value: TStockValue
+    ): Promise<TStockOrder> {
+        // TODO -
+        return;
+    }
+
+    async placeStopMarketOrder(
+        trigger: TStockPrice,
+        value: TStockValue
+    ): Promise<TStockOrder> {
         return await this.request<TStockOrder>({
             point: 'order',
             method: 'POST',
-            params: {
-                symbol: 'XBTUSD',
+            params: this.appendOrderStaticParams({
                 type: 'Stop',
-                stopPx: price,
+                stopPx: trigger,
                 orderQty: value,
-                timeInForce: 'GoodTillCancel',
-                execInst: 'LastPrice',
-            },
+            }),
         });
     }
 
-    async cancelOrder(orderID: TStockOrderID): Promise<unknown> {
+    async placeTakeLimitOrder(
+        price: TStockPrice,
+        trigger: TStockPrice,
+        value: TStockValue
+    ): Promise<TStockOrder> {
+        // TODO -
+        return;
+    }
+
+    async placeTakeMarketOrder(
+        trigger: TStockPrice,
+        value: TStockValue
+    ): Promise<TStockOrder> {
+        // TODO -
+        return;
+    }
+
+    async cancelOrder(orderID: TStockOrderId): Promise<unknown> {
         return await this.request({
             point: 'order',
             method: 'DELETE',
@@ -93,7 +143,7 @@ export class Bitmex implements IStock {
         });
     }
 
-    async hasOrder(orderID: TStockOrderID): Promise<boolean> {
+    async hasOrder(orderID: TStockOrderId): Promise<boolean> {
         const orders: TStockOrder[] = await this.getOrders();
 
         for (const order of orders) {
@@ -107,6 +157,14 @@ export class Bitmex implements IStock {
 
     getLastError(): TStockLastError {
         return this.lastError;
+    }
+
+    private appendOrderStaticParams(params: TStockOrder): TStockOrder {
+        params.symbol = 'XBTUSD';
+        params.timeInForce = 'GoodTillCancel';
+        params.execInst = 'LastPrice';
+
+        return params;
     }
 
     private async request<T>(args: TRequestOptions): Promise<T> {
