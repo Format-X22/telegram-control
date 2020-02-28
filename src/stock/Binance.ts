@@ -7,16 +7,16 @@ type TStockOrder = {
 type TStockPosition = {
     // TODO -
 };
-type TStockUserData = {
+type TStockMarginData = {
     // TODO -
 };
 
-export class Binance implements IStock<TStockUserData, TStockPosition, TStockOrder, TStockOrderId> {
+export class Binance implements IStock<TStockMarginData, TStockPosition, TStockOrder, TStockOrderId> {
     constructor() {
         // TODO -
     }
 
-    async getUserData(): Promise<TStockUserData> {
+    async getMarginData(): Promise<TStockMarginData> {
         // TODO -
         return;
     }
@@ -36,7 +36,7 @@ export class Binance implements IStock<TStockUserData, TStockPosition, TStockOrd
         return;
     }
 
-    async placeMarketOrder(price: TStockPrice, value: TStockValue): Promise<TStockOrder> {
+    async placeMarketOrder(value: TStockValue): Promise<TStockOrder> {
         // TODO -
         return;
     }

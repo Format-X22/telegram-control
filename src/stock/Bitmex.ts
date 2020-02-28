@@ -6,21 +6,18 @@ import { IStock, TStockLastError, TStockPrice, TStockValue } from './IStock';
 
 type TStockOrderId = string;
 type TStockOrder = {
-    type: string;
+    ordType: string;
     orderQty: number;
     orderID?: TStockOrderId;
     symbol?: string;
     timeInForce?: string;
     execInst?: string;
-    ordType?: string;
     price?: number;
     stopPx?: number;
 };
-type TStockPosition = {
-    // TODO -
-};
-type TStockUserData = {
-    // TODO -
+type TStockPosition = {};
+type TStockMarginData = {
+    marginLeverage: number;
 };
 
 type TAuthHeaders = {
@@ -51,7 +48,8 @@ const REQUEST_RETRY_SLEEP: number = 3000;
 export const ONE_SECOND: number = 1000;
 export const MINUTE_IN_SECONDS: number = 60;
 
-export class Bitmex implements IStock<TStockUserData, TStockPosition, TStockOrder, TStockOrderId> {
+export class Bitmex
+    implements IStock<TStockMarginData, TStockPosition, TStockOrder, TStockOrderId> {
     private lastError?: TStockLastError;
     private readonly publicKey: string;
     private readonly privateKey: string;
@@ -61,9 +59,12 @@ export class Bitmex implements IStock<TStockUserData, TStockPosition, TStockOrde
         this.privateKey = config.bitmexPrivateKey;
     }
 
-    async getUserData(): Promise<TStockUserData> {
-        // TODO -
-        return;
+    async getMarginData(): Promise<TStockMarginData> {
+        return await this.request<TStockMarginData>({
+            point: 'user/margin',
+            method: 'GET',
+            params: {},
+        });
     }
 
     async getPosition(): Promise<TStockPosition> {
@@ -85,13 +86,26 @@ export class Bitmex implements IStock<TStockUserData, TStockPosition, TStockOrde
     }
 
     async placeLimitOrder(price: TStockPrice, value: TStockValue): Promise<TStockOrder> {
-        // TODO -
-        return;
+        return await this.request<TStockOrder>({
+            point: 'order',
+            method: 'POST',
+            params: this.appendOrderStaticParams({
+                ordType: 'Limit',
+                orderQty: value,
+                price,
+            }),
+        });
     }
 
-    async placeMarketOrder(price: TStockPrice, value: TStockValue): Promise<TStockOrder> {
-        // TODO -
-        return;
+    async placeMarketOrder(value: TStockValue): Promise<TStockOrder> {
+        return await this.request<TStockOrder>({
+            point: 'order',
+            method: 'POST',
+            params: this.appendOrderStaticParams({
+                ordType: 'Market',
+                orderQty: value,
+            }),
+        });
     }
 
     async placeStopLimitOrder(
@@ -99,21 +113,28 @@ export class Bitmex implements IStock<TStockUserData, TStockPosition, TStockOrde
         trigger: TStockPrice,
         value: TStockValue
     ): Promise<TStockOrder> {
-        // TODO -
-        return;
-    }
-
-    async placeStopMarketOrder(
-        trigger: TStockPrice,
-        value: TStockValue
-    ): Promise<TStockOrder> {
         return await this.request<TStockOrder>({
             point: 'order',
             method: 'POST',
             params: this.appendOrderStaticParams({
-                type: 'Stop',
-                stopPx: trigger,
+                ordType: 'StopLimit',
                 orderQty: value,
+                stopPx: trigger,
+                price,
+                execInst: 'LastPrice',
+            }),
+        });
+    }
+
+    async placeStopMarketOrder(trigger: TStockPrice, value: TStockValue): Promise<TStockOrder> {
+        return await this.request<TStockOrder>({
+            point: 'order',
+            method: 'POST',
+            params: this.appendOrderStaticParams({
+                ordType: 'Stop',
+                orderQty: value,
+                stopPx: trigger,
+                execInst: 'LastPrice',
             }),
         });
     }
@@ -123,16 +144,30 @@ export class Bitmex implements IStock<TStockUserData, TStockPosition, TStockOrde
         trigger: TStockPrice,
         value: TStockValue
     ): Promise<TStockOrder> {
-        // TODO -
-        return;
+        return await this.request<TStockOrder>({
+            point: 'order',
+            method: 'POST',
+            params: this.appendOrderStaticParams({
+                ordType: 'LimitIfTouched',
+                orderQty: value,
+                stopPx: trigger,
+                price,
+                execInst: 'LastPrice',
+            }),
+        });
     }
 
-    async placeTakeMarketOrder(
-        trigger: TStockPrice,
-        value: TStockValue
-    ): Promise<TStockOrder> {
-        // TODO -
-        return;
+    async placeTakeMarketOrder(trigger: TStockPrice, value: TStockValue): Promise<TStockOrder> {
+        return await this.request<TStockOrder>({
+            point: 'order',
+            method: 'POST',
+            params: this.appendOrderStaticParams({
+                ordType: 'MarketIfTouched',
+                orderQty: value,
+                stopPx: trigger,
+                execInst: 'LastPrice',
+            }),
+        });
     }
 
     async cancelOrder(orderID: TStockOrderId): Promise<unknown> {
@@ -162,7 +197,6 @@ export class Bitmex implements IStock<TStockUserData, TStockPosition, TStockOrde
     private appendOrderStaticParams(params: TStockOrder): TStockOrder {
         params.symbol = 'XBTUSD';
         params.timeInForce = 'GoodTillCancel';
-        params.execInst = 'LastPrice';
 
         return params;
     }
