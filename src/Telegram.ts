@@ -40,6 +40,7 @@ export class Telegram {
 
             case '/bart':
             case '/zigzag':
+            case '/spike':
                 await this.taskController.handleTask(command.slice(1), data);
                 return;
 

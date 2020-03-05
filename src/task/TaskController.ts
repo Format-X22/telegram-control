@@ -3,6 +3,7 @@ import { stocks, TStock, TWorker, workers } from '../data/config';
 import { Bart } from '../workers/Bart';
 import { Zigzag } from '../workers/Zigzag';
 import { Telegram } from '../Telegram';
+import { Spike } from '../workers/Spike';
 
 const BART_TAKE_DISTANCE = 0.86;
 const BART_STOP_DISTANCE = -0.86;
@@ -83,9 +84,13 @@ export class TaskController {
             task.exit = Math.round(
                 task.enter * (1 - (task.stop / task.enter - 1) * ZIGZAG_DISTANCE)
             );
+        } else if (task.workerClass === Spike) {
+            // TODO -
         } else {
             return null;
         }
+
+        // TODO Spike invert calc
 
         if (task.isLong) {
             task.exitAmount = Math.round(

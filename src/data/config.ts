@@ -3,6 +3,7 @@ import { Binance } from '../stock/Binance';
 import * as jsonConfig from '../../config.json';
 import { Bart } from '../workers/Bart';
 import { Zigzag } from '../workers/Zigzag';
+import { Spike } from '../workers/Spike';
 
 const rawConfig = jsonConfig as {
     telegramKey: string;
@@ -24,8 +25,9 @@ export const stocks = {
     binance: Binance,
 };
 
-export type TWorker = Bart | Zigzag;
+export type TWorker = Bart | Zigzag | Spike;
 export const workers = {
     bart: Bart,
     zigzag: Zigzag,
+    spike: Spike,
 };
