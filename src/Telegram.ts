@@ -5,8 +5,6 @@ import { TaskController } from './task/TaskController';
 
 export class Telegram {
     private bot;
-    private readonly tasks = [];
-    private lastError;
     private taskController: TaskController;
 
     constructor() {

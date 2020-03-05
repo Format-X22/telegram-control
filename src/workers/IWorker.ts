@@ -1,3 +1,5 @@
+import { ITask } from '../task/ITask';
+
 export interface IWorker {
-    // TODO -
+    init(task: ITask): Promise<void>;
 }
