@@ -37,7 +37,7 @@ export class TaskController {
         }
 
         task.stock = new task.stockClass();
-        task.worker = new task.workerClass(task);
+        task.worker = new task.workerClass(task, this.telegram);
 
         await task.worker.start();
         this.tasks.add(task);
@@ -64,7 +64,7 @@ export class TaskController {
 
         return {
             id: lastTaskId++,
-            status: 'CONSTRUCT',
+            state: 'CONSTRUCT',
             workerClass,
             worker: null,
             stockClass,

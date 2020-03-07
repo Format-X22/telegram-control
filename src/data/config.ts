@@ -5,18 +5,22 @@ import { Bart } from '../workers/Bart';
 import { Zigzag } from '../workers/Zigzag';
 import { Spike } from '../workers/Spike';
 
-type config = {
+export const config: {
     telegramKey: string;
     telegramBotOwner: number;
     bitmexPublicKey: string;
     bitmexPrivateKey: string;
-};
-
-export const config: config = {
+    phoneCallLogin: string;
+    phoneCallPass: string;
+    phoneCallPhone: string;
+} = {
     telegramKey: jsonConfig.telegramKey,
     telegramBotOwner: jsonConfig.telegramBotOwner,
     bitmexPublicKey: jsonConfig.bitmexPublicKey,
     bitmexPrivateKey: jsonConfig.bitmexPrivateKey,
+    phoneCallLogin: jsonConfig.phoneCallLogin,
+    phoneCallPass: jsonConfig.phoneCallPass,
+    phoneCallPhone: jsonConfig.phoneCallPhone,
 };
 
 export const stocks: {

@@ -1,13 +1,16 @@
 import { BWorker, IWorker } from './Worker';
 
 export class Zigzag extends BWorker implements IWorker {
-    start(): Promise<null> {
+    protected async placeInitOrders(): Promise<void> {
         // TODO -
         return;
     }
 
-    stop(): Promise<null> {
+    protected async removeInitOrders(): Promise<void> {
         // TODO -
-        return;
+    }
+
+    protected async loop(): Promise<void> {
+        // TODO -
     }
 }

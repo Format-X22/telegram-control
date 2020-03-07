@@ -2,5 +2,8 @@
   "telegramKey": "",
   "telegramBotOwner": 0,
   "bitmexPublicKey": "",
-  "bitmexPrivateKey": ""
+  "bitmexPrivateKey": "",
+  "phoneCallLogin": "",
+  "phoneCallPass": "",
+  "phoneCallPhone": ""
 }

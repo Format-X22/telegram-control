@@ -1,10 +1,11 @@
 import { TWorker } from '../workers/Worker';
 import { TStock } from '../stock/Stock';
+import { Telegram } from '../Telegram';
 
 export type TTask = {
     id: number;
-    status: string;
-    workerClass: new (task: TTask) => TWorker;
+    state: 'CONSTRUCT' | 'INIT' | 'DESTROYED' | 'ERROR';
+    workerClass: new (task: TTask, telegram: Telegram) => TWorker;
     worker: TWorker;
     stockClass: new () => TStock;
     stock: TStock;
