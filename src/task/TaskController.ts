@@ -7,21 +7,21 @@ import { Spike } from '../workers/Spike';
 import { TWorker } from '../workers/Worker';
 import { TStock } from '../stock/Stock';
 
-const BART_TAKE_DISTANCE = 0.86;
-const BART_STOP_DISTANCE = -0.86;
-const ZIGZAG_DISTANCE = 2.8;
-const BAD_MOVE_PERCENT = 0.2;
-const ENTER_SAFE_MARGIN_PERCENT = 0.05;
-const EXIT_TRIGGER_MARGIN_PERCENT = 0.15;
+const BART_TAKE_DISTANCE: number = 0.86;
+const BART_STOP_DISTANCE: number = -0.86;
+const ZIGZAG_DISTANCE: number = 2.8;
+const BAD_MOVE_PERCENT: number = 0.2;
+const ENTER_SAFE_MARGIN_PERCENT: number = 0.05;
+const EXIT_TRIGGER_MARGIN_PERCENT: number = 0.15;
 
-let lastTaskId = 0;
+let lastTaskId: number = 0;
 
 export class TaskController {
     private readonly tasks: Set<TTask> = new Set();
 
     constructor(private telegram: Telegram) {}
 
-    public async handleTask(type: string, data: Array<string>) {
+    public async handleTask(type: string, data: Array<string>): Promise<void> {
         const rawTask: TTask | null = this.buildRawTask(type, data);
 
         if (!rawTask) {
@@ -29,7 +29,7 @@ export class TaskController {
             return;
         }
 
-        const task = this.calcTask(rawTask);
+        const task: TTask = this.calcTask(rawTask);
 
         if (!task) {
             await this.telegram.send('Calculation fail');
@@ -54,7 +54,11 @@ export class TaskController {
         const workerClass: new () => TWorker = workers[workerName];
         const stockClass: new () => TStock = stocks[stockName];
 
-        if (!workerClass || !stockClass || [amount, enter, stop].some(v => !Number.isFinite(v))) {
+        if (
+            !workerClass ||
+            !stockClass ||
+            [amount, enter, stop].some((v: number): boolean => !Number.isFinite(v))
+        ) {
             return null;
         }
 
@@ -123,14 +127,14 @@ export class TaskController {
         return task;
     }
 
-    public async status() {
+    public async status(): Promise<void> {
         const messageLines: Array<String> = [];
 
         for (const [stockName, stockClass] of Object.entries(stocks)) {
             for (const [workerName, workerClass] of Object.entries(workers)) {
                 for (const task of this.tasks) {
                     if (task.workerClass === workerClass && task.stockClass === stockClass) {
-                        const explain = this.explainTaskStatus(task, workerName, stockName);
+                        const explain: string = this.explainTaskStatus(task, workerName, stockName);
 
                         messageLines.push(
                             `Stock "${stockName}", type "${workerName}":\n\n ${explain}`
@@ -150,7 +154,7 @@ export class TaskController {
     private explainTaskStatus(task: TTask, workerName: string, stockName: string): string {
         return JSON.stringify(
             task,
-            (key, value) => {
+            (key: string, value: string): string => {
                 if (key === 'workerClass' || key === 'stockClass') {
                     return;
                 }
@@ -169,9 +173,9 @@ export class TaskController {
         );
     }
 
-    public async cancel(data: [string]) {
+    public async cancel(data: Array<string>): Promise<void> {
         const id: number = Number(data[0]);
-        let isCanceled = false;
+        let isCanceled: boolean = false;
 
         if (!Number.isFinite(id)) {
             await this.telegram.send('Invalid args');

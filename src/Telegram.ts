@@ -4,7 +4,7 @@ import { config } from './data/config';
 import { TaskController } from './task/TaskController';
 
 export class Telegram {
-    private bot;
+    private bot: TelegramBot;
     private taskController: TaskController;
 
     constructor() {
@@ -13,19 +13,19 @@ export class Telegram {
         this.bot.on('text', this.handleText.bind(this));
         this.taskController = new TaskController(this);
 
-        this.send('Started!').catch(error => {
+        this.send('Started!').catch((error: Error): void => {
             console.error(error);
             process.exit(1);
         });
     }
 
-    public async send(text: string, id: number = config.telegramBotOwner) {
+    public async send(text: string, id: number = config.telegramBotOwner): Promise<void> {
         await this.bot.sendMessage(id, text);
     }
 
-    private async handleText(message) {
+    private async handleText(message: { chat: { id: number }; text: string }): Promise<void> {
         const id: number = message.chat.id;
-        const [command, ...data]: [string, string] = message.text.split(/ +/);
+        const [command, ...data]: Array<string> = message.text.split(/ +/);
 
         if (id !== config.telegramBotOwner) {
             await this.send('Just private use only.', id);
@@ -35,7 +35,7 @@ export class Telegram {
         await this.route(command, data);
     }
 
-    private async route(command: string, data: [string]) {
+    private async route(command: string, data: Array<string>): Promise<void> {
         switch (command) {
             case '/status':
                 await this.taskController.status();

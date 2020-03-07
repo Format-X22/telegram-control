@@ -35,6 +35,7 @@
     "request": "^2.88.2",
     "request-promise-native": "^1.0.8",
     "tsc": "^1.20150623.0",
+    "tslint": "^6.0.0",
     "typescript": "^3.8.2"
   }
 }
