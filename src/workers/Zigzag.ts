@@ -1,12 +1,13 @@
-import { IWorker } from './IWorker';
-import { ITask } from '../task/ITask';
+import { BWorker, IWorker } from './Worker';
 
-export class Zigzag implements IWorker {
-    private task = null;
-
-    async init(task: ITask) {
-        this.task = task;
-
+export class Zigzag extends BWorker implements IWorker {
+    start(): Promise<null> {
         // TODO -
+        return;
+    }
+
+    stop(): Promise<null> {
+        // TODO -
+        return;
     }
 }

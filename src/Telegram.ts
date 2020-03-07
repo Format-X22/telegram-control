@@ -12,6 +12,11 @@ export class Telegram {
 
         this.bot.on('text', this.handleText.bind(this));
         this.taskController = new TaskController(this);
+
+        this.send('Started!').catch(error => {
+            console.error(error);
+            process.exit(1);
+        });
     }
 
     public async send(text: string, id: number = config.telegramBotOwner) {

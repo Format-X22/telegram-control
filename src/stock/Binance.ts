@@ -1,4 +1,4 @@
-import { IStock, TStockLastError, TStockPrice, TStockValue } from './IStock';
+import { IStock, TStockLastError, TStockPrice, TStockValue } from './Stock';
 
 type TStockOrderId = string;
 type TStockOrder = {

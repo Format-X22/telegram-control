@@ -1,12 +1,13 @@
-import { ITask } from '../task/ITask';
-import { IWorker } from './IWorker';
+import { BWorker, IWorker } from './Worker';
 
-export class Bart implements IWorker {
-    private task = null;
-
-    async init(task: ITask) {
-        this.task = task;
-
+export class Bart extends BWorker implements IWorker {
+    start(): Promise<null> {
         // TODO -
+        return;
+    }
+
+    stop(): Promise<null> {
+        // TODO -
+        return;
     }
 }

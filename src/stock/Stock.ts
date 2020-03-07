@@ -1,3 +1,6 @@
+import { Bitmex } from './Bitmex';
+import { Binance } from './Binance';
+
 export type TStockLastError = string | null;
 export type TStockPrice = number;
 export type TStockValue = number;
@@ -13,20 +16,16 @@ export interface IStock<TStockMarginData, TStockPosition, TStockOrder, TStockOrd
         trigger: TStockPrice,
         value: TStockValue
     ): Promise<TStockOrder>;
-    placeStopMarketOrder(
-        trigger: TStockPrice,
-        value: TStockValue
-    ): Promise<TStockOrder>;
+    placeStopMarketOrder(trigger: TStockPrice, value: TStockValue): Promise<TStockOrder>;
     placeTakeLimitOrder(
         price: TStockPrice,
         trigger: TStockPrice,
         value: TStockValue
     ): Promise<TStockOrder>;
-    placeTakeMarketOrder(
-        trigger: TStockPrice,
-        value: TStockValue
-    ): Promise<TStockOrder>;
+    placeTakeMarketOrder(trigger: TStockPrice, value: TStockValue): Promise<TStockOrder>;
     cancelOrder(orderID: TStockOrderId): Promise<unknown>;
     hasOrder(orderID: TStockOrderId): Promise<boolean>;
     getLastError(): TStockLastError;
 }
+
+export type TStock = Bitmex | Binance;

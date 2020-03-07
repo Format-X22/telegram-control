@@ -19,13 +19,11 @@ export const config = {
     bitmexPrivateKey: rawConfig.bitmexPrivateKey,
 };
 
-export type TStock = Bitmex | Binance;
 export const stocks = {
     bitmex: Bitmex,
     binance: Binance,
 };
 
-export type TWorker = Bart | Zigzag | Spike;
 export const workers = {
     bart: Bart,
     zigzag: Zigzag,

@@ -2,7 +2,7 @@ import * as crypto from 'crypto';
 import * as request from 'request-promise-native';
 import { EventLoop } from '../utils/EventLoop';
 import { config } from '../data/config';
-import { IStock, TStockLastError, TStockPrice, TStockValue } from './IStock';
+import { IStock, TStockLastError, TStockPrice, TStockValue } from './Stock';
 
 type TStockOrderId = string;
 type TStockOrder = {

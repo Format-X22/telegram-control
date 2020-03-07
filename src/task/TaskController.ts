@@ -1,9 +1,11 @@
-import { ITask } from './ITask';
-import { stocks, TStock, TWorker, workers } from '../data/config';
+import { TTask } from './TTask';
+import { stocks, workers } from '../data/config';
 import { Bart } from '../workers/Bart';
 import { Zigzag } from '../workers/Zigzag';
 import { Telegram } from '../Telegram';
 import { Spike } from '../workers/Spike';
+import { TWorker } from '../workers/Worker';
+import { TStock } from '../stock/Stock';
 
 const BART_TAKE_DISTANCE = 0.86;
 const BART_STOP_DISTANCE = -0.86;
@@ -12,14 +14,15 @@ const BAD_MOVE_PERCENT = 0.2;
 const ENTER_SAFE_MARGIN_PERCENT = 0.05;
 const EXIT_TRIGGER_MARGIN_PERCENT = 0.15;
 
+let lastTaskId = 0;
+
 export class TaskController {
-    private readonly tasks = [];
-    private lastError = null;
+    private readonly tasks: Set<TTask> = new Set();
 
     constructor(private telegram: Telegram) {}
 
     public async handleTask(type: string, data: Array<string>) {
-        const rawTask: ITask | null = this.buildRawTask(type, data);
+        const rawTask: TTask | null = this.buildRawTask(type, data);
 
         if (!rawTask) {
             await this.telegram.send('Invalid args');
@@ -33,16 +36,16 @@ export class TaskController {
             return;
         }
 
-        this.tasks.push(task);
+        task.stock = new task.stockClass();
+        task.worker = new task.workerClass(task);
 
-        // TODO -
-
-        task.active = true;
+        await task.worker.start();
+        this.tasks.add(task);
 
         await this.status();
     }
 
-    private buildRawTask(type: string, data: Array<string>): ITask | null {
+    private buildRawTask(type: string, data: Array<string>): TTask | null {
         const workerName: string = String(type).toLowerCase();
         const stockName: string = String(data[0]).toLowerCase();
         const amount: number = Number(data[1]);
@@ -56,7 +59,8 @@ export class TaskController {
         }
 
         return {
-            active: false,
+            id: lastTaskId++,
+            status: 'CONSTRUCT',
             workerClass,
             worker: null,
             stockClass,
@@ -69,10 +73,11 @@ export class TaskController {
             isLong: stop < enter,
             stopAmount: null,
             exitAmount: null,
+            lastError: null,
         };
     }
 
-    private calcTask(task: ITask): ITask {
+    private calcTask(task: TTask): TTask {
         if (task.workerClass === Bart) {
             task.exit = Math.round(
                 task.enter * (1 - (task.stop / task.enter - 1) * BART_TAKE_DISTANCE)
@@ -119,12 +124,11 @@ export class TaskController {
     }
 
     public async status() {
-        const activeTasks: Array<ITask> = this.tasks.filter((task: ITask) => task.active);
         const messageLines: Array<String> = [];
 
         for (const [stockName, stockClass] of Object.entries(stocks)) {
             for (const [workerName, workerClass] of Object.entries(workers)) {
-                for (const task of activeTasks) {
+                for (const task of this.tasks) {
                     if (task.workerClass === workerClass && task.stockClass === stockClass) {
                         const explain = this.explainTaskStatus(task, workerName, stockName);
 
@@ -136,12 +140,14 @@ export class TaskController {
             }
         }
 
-        messageLines.push(`Last error: ${this.lastError}`);
+        if (!messageLines.length) {
+            messageLines.push('Task list is empty');
+        }
 
         await this.telegram.send(messageLines.join('\n\n'));
     }
 
-    private explainTaskStatus(task: ITask, workerName: string, stockName: string): string {
+    private explainTaskStatus(task: TTask, workerName: string, stockName: string): string {
         return JSON.stringify(
             task,
             (key, value) => {
@@ -164,8 +170,29 @@ export class TaskController {
     }
 
     public async cancel(data: [string]) {
-        // TODO -
+        const id: number = Number(data[0]);
+        let isCanceled = false;
 
-        await this.telegram.send('TODO');
+        if (!Number.isFinite(id)) {
+            await this.telegram.send('Invalid args');
+            return;
+        }
+
+        for (const task of this.tasks) {
+            if (task.id === id) {
+                await task.worker.stop();
+                this.tasks.delete(task);
+
+                isCanceled = true;
+                break;
+            }
+        }
+
+        if (!isCanceled) {
+            await this.telegram.send('Not found');
+            return;
+        }
+
+        await this.status();
     }
 }
