@@ -21,7 +21,7 @@ export class TaskController {
 
     constructor(private telegram: Telegram) {}
 
-    public async handleTask(type: string, data: Array<string>): Promise<void> {
+    public async handleTask(type: string, data: string[]): Promise<void> {
         const rawTask: Task | null = this.buildRawTask(type, data);
 
         if (!rawTask) {
@@ -45,7 +45,7 @@ export class TaskController {
         await this.status();
     }
 
-    private buildRawTask(type: string, data: Array<string>): Task | null {
+    private buildRawTask(type: string, data: string[]): Task | null {
         const workerName: string = String(type).toLowerCase();
         const stockName: string = String(data[0]).toLowerCase();
         const amount: number = Number(data[1]);
@@ -125,7 +125,7 @@ export class TaskController {
     }
 
     public async status(): Promise<void> {
-        const messageLines: Array<String> = [];
+        const messageLines: string[] = [];
 
         for (const [stockName, stockClass] of Object.entries(stocks)) {
             for (const [workerName, workerClass] of Object.entries(workers)) {
@@ -170,7 +170,7 @@ export class TaskController {
         );
     }
 
-    public async cancel(data: Array<string>): Promise<void> {
+    public async cancel(data: string[]): Promise<void> {
         const id: number = Number(data[0]);
         let isCanceled: boolean = false;
 

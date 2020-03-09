@@ -25,7 +25,7 @@ export class Telegram {
 
     private async handleText(message: { chat: { id: number }; text: string }): Promise<void> {
         const id: number = message.chat.id;
-        const [command, ...data]: Array<string> = message.text.split(/ +/);
+        const [command, ...data]: string[] = message.text.split(/ +/);
 
         if (id !== config.telegramBotOwner) {
             await this.send('Just private use only.', id);
@@ -35,7 +35,7 @@ export class Telegram {
         await this.route(command, data);
     }
 
-    private async route(command: string, data: Array<string>): Promise<void> {
+    private async route(command: string, data: string[]): Promise<void> {
         switch (command) {
             case '/status':
                 await this.taskController.status();

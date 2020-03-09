@@ -1,31 +1,30 @@
 import { Bitmex } from './Bitmex';
 import { Binance } from './Binance';
 
-export type TStockLastError = string | null;
 export type TStockPrice = number;
 export type TStockValue = number;
+export type TStockOrderId = number;
+export type TStockLeverage = number;
 
-export interface IStock<TStockMarginData, TStockPosition, TStockOrder, TStockOrderId> {
-    getMarginData(): Promise<TStockMarginData>;
-    getPosition(): Promise<TStockPosition>;
-    getOrders(): Promise<TStockOrder[]>;
-    placeLimitOrder(price: TStockPrice, value: TStockValue): Promise<TStockOrder>;
-    placeMarketOrder(value: TStockValue): Promise<TStockOrder>;
+export interface IStock {
+    getLeverage(): Promise<TStockLeverage>;
+    getOrders(): Promise<TStockOrderId[]>;
+    placeLimitOrder(price: TStockPrice, value: TStockValue): Promise<TStockOrderId>;
+    placeMarketOrder(value: TStockValue): Promise<TStockOrderId>;
     placeStopLimitOrder(
         price: TStockPrice,
         trigger: TStockPrice,
         value: TStockValue
-    ): Promise<TStockOrder>;
-    placeStopMarketOrder(trigger: TStockPrice, value: TStockValue): Promise<TStockOrder>;
+    ): Promise<TStockOrderId>;
+    placeStopMarketOrder(trigger: TStockPrice, value: TStockValue): Promise<TStockOrderId>;
     placeTakeLimitOrder(
         price: TStockPrice,
         trigger: TStockPrice,
         value: TStockValue
-    ): Promise<TStockOrder>;
-    placeTakeMarketOrder(trigger: TStockPrice, value: TStockValue): Promise<TStockOrder>;
-    cancelOrder(orderID: TStockOrderId): Promise<unknown>;
+    ): Promise<TStockOrderId>;
+    placeTakeMarketOrder(trigger: TStockPrice, value: TStockValue): Promise<TStockOrderId>;
+    cancelOrder(orderID: TStockOrderId): Promise<void>;
     hasOrder(orderID: TStockOrderId): Promise<boolean>;
-    getLastError(): TStockLastError;
 }
 
 export type TStock = Bitmex | Binance;

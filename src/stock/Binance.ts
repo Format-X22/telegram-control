@@ -1,42 +1,26 @@
-import { IStock, TStockLastError, TStockPrice, TStockValue } from './Stock';
+import { IStock, TStockLeverage, TStockOrderId, TStockPrice, TStockValue } from './Stock';
 
-type TStockOrderId = string;
-type TStockOrder = {
-    // TODO -
-};
-type TStockPosition = {
-    // TODO -
-};
-type TStockMarginData = {
-    // TODO -
-};
-
-export class Binance implements IStock<TStockMarginData, TStockPosition, TStockOrder, TStockOrderId> {
+export class Binance implements IStock {
     constructor() {
         // TODO -
     }
 
-    async getMarginData(): Promise<TStockMarginData> {
+    async getLeverage(): Promise<TStockLeverage> {
         // TODO -
         return;
     }
 
-    async getPosition(): Promise<TStockPosition> {
+    async getOrders(): Promise<TStockOrderId[]> {
         // TODO -
         return;
     }
 
-    async getOrders(): Promise<TStockOrder[]> {
+    async placeLimitOrder(price: TStockPrice, value: TStockValue): Promise<TStockOrderId> {
         // TODO -
         return;
     }
 
-    async placeLimitOrder(price: TStockPrice, value: TStockValue): Promise<TStockOrder> {
-        // TODO -
-        return;
-    }
-
-    async placeMarketOrder(value: TStockValue): Promise<TStockOrder> {
+    async placeMarketOrder(value: TStockValue): Promise<TStockOrderId> {
         // TODO -
         return;
     }
@@ -45,15 +29,12 @@ export class Binance implements IStock<TStockMarginData, TStockPosition, TStockO
         price: TStockPrice,
         trigger: TStockPrice,
         value: TStockValue
-    ): Promise<TStockOrder> {
+    ): Promise<TStockOrderId> {
         // TODO -
         return;
     }
 
-    async placeStopMarketOrder(
-        trigger: TStockPrice,
-        value: TStockValue
-    ): Promise<TStockOrder> {
+    async placeStopMarketOrder(trigger: TStockPrice, value: TStockValue): Promise<TStockOrderId> {
         // TODO -
         return;
     }
@@ -62,30 +43,22 @@ export class Binance implements IStock<TStockMarginData, TStockPosition, TStockO
         price: TStockPrice,
         trigger: TStockPrice,
         value: TStockValue
-    ): Promise<TStockOrder> {
+    ): Promise<TStockOrderId> {
         // TODO -
         return;
     }
 
-    async placeTakeMarketOrder(
-        trigger: TStockPrice,
-        value: TStockValue
-    ): Promise<TStockOrder> {
+    async placeTakeMarketOrder(trigger: TStockPrice, value: TStockValue): Promise<TStockOrderId> {
         // TODO -
         return;
     }
 
-    async cancelOrder(orderID: TStockOrderId): Promise<unknown> {
+    async cancelOrder(orderID: TStockOrderId): Promise<void> {
         // TODO -
         return;
     }
 
     async hasOrder(orderID: TStockOrderId): Promise<boolean> {
-        // TODO -
-        return;
-    }
-
-    getLastError(): TStockLastError {
         // TODO -
         return;
     }

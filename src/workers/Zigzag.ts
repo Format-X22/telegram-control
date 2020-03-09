@@ -1,5 +1,5 @@
 import { BWorker, IWorker } from './Worker';
-import { TaskState } from '../task/Task';
+import {Task, TaskState} from '../task/Task';
 
 export class Zigzag extends BWorker implements IWorker {
     protected async placeInitOrders(): Promise<void> {

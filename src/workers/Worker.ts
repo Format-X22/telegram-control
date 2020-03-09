@@ -20,9 +20,7 @@ export abstract class BWorker {
     private isLoopInProgress: boolean = false;
     private isStopLoopCalled: boolean = false;
 
-    constructor(protected task: Task, protected telegram: Telegram) {
-        this.task.stock = new this.task.stockClass();
-    }
+    constructor(protected task: Task, protected telegram: Telegram) {}
 
     async start(): Promise<void> {
         this.task.state = TaskState.Init;
