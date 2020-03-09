@@ -1,4 +1,4 @@
-import { TaskState, TTask } from './TTask';
+import { TaskState, Task } from './Task';
 import { stocks, workers } from '../data/config';
 import { Bart } from '../workers/Bart';
 import { Zigzag } from '../workers/Zigzag';
@@ -17,19 +17,19 @@ const EXIT_TRIGGER_MARGIN_PERCENT: number = 0.15;
 let lastTaskId: number = 0;
 
 export class TaskController {
-    private readonly tasks: Set<TTask> = new Set();
+    private readonly tasks: Set<Task> = new Set();
 
     constructor(private telegram: Telegram) {}
 
     public async handleTask(type: string, data: Array<string>): Promise<void> {
-        const rawTask: TTask | null = this.buildRawTask(type, data);
+        const rawTask: Task | null = this.buildRawTask(type, data);
 
         if (!rawTask) {
             await this.telegram.send('Invalid args');
             return;
         }
 
-        const task: TTask = this.calcTask(rawTask);
+        const task: Task = this.calcTask(rawTask);
 
         if (!task) {
             await this.telegram.send('Calculation fail');
@@ -45,12 +45,13 @@ export class TaskController {
         await this.status();
     }
 
-    private buildRawTask(type: string, data: Array<string>): TTask | null {
+    private buildRawTask(type: string, data: Array<string>): Task | null {
         const workerName: string = String(type).toLowerCase();
         const stockName: string = String(data[0]).toLowerCase();
         const amount: number = Number(data[1]);
         const enter: number = Number(data[2]);
         const stop: number = Number(data[3]);
+        const disableNormalizing: string = String(data[4]).toLowerCase();
         const workerClass: new () => TWorker = workers[workerName];
         const stockClass: new () => TStock = stocks[stockName];
 
@@ -62,26 +63,22 @@ export class TaskController {
             return null;
         }
 
-        return {
-            id: lastTaskId++,
-            state: TaskState.Constructed,
-            workerClass,
-            worker: null,
-            stockClass,
-            stock: null,
-            amount,
-            enter,
-            stop,
-            exitTrigger: null,
-            exit: null,
-            isLong: stop < enter,
-            stopAmount: null,
-            exitAmount: null,
-            lastError: null,
-        };
+        const task: Task = new Task();
+
+        task.id = lastTaskId++;
+        task.state = TaskState.Constructed;
+        task.workerClass = workerClass;
+        task.stockClass = stockClass;
+        task.amount = amount;
+        task.enter = enter;
+        task.stop = stop;
+        task.isLong = stop < enter;
+        task.disableNormalizing = Boolean(disableNormalizing);
+
+        return task;
     }
 
-    private calcTask(task: TTask): TTask {
+    private calcTask(task: Task): Task {
         if (task.workerClass === Bart) {
             task.exit = Math.round(
                 task.enter * (1 - (task.stop / task.enter - 1) * BART_TAKE_DISTANCE)
@@ -151,7 +148,7 @@ export class TaskController {
         await this.telegram.send(messageLines.join('\n\n'));
     }
 
-    private explainTaskStatus(task: TTask, workerName: string, stockName: string): string {
+    private explainTaskStatus(task: Task, workerName: string, stockName: string): string {
         return JSON.stringify(
             task,
             (key: string, value: string): string => {

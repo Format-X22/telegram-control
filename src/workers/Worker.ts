@@ -1,6 +1,6 @@
 import * as request from 'request-promise-native';
 import { config } from '../data/config';
-import { TaskState, TTask } from '../task/TTask';
+import { TaskState, Task } from '../task/Task';
 import { Zigzag } from './Zigzag';
 import { Spike } from './Spike';
 import { Bart } from './Bart';
@@ -20,17 +20,23 @@ export abstract class BWorker {
     private isLoopInProgress: boolean = false;
     private isStopLoopCalled: boolean = false;
 
-    constructor(protected task: TTask, protected telegram: Telegram) {}
+    constructor(protected task: Task, protected telegram: Telegram) {
+        this.task.stock = new this.task.stockClass();
+    }
 
     async start(): Promise<void> {
+        this.task.state = TaskState.Init;
+
         try {
             await this.placeInitOrders();
+
+            this.task.state = TaskState.Waiting;
         } catch (error) {
+            this.task.state = TaskState.Critical;
+
             await this.telegram.send('Error on start');
             return;
         }
-
-        this.task.state = TaskState.Init;
 
         this.startLoop();
     }
@@ -74,6 +80,44 @@ export abstract class BWorker {
         }, LOOP_TIMEOUT);
     }
 
+    protected async loop(): Promise<void> {
+        switch (this.task.state) {
+            case TaskState.Waiting:
+                await this.onWaiting();
+                break;
+
+            case TaskState.Inside:
+                await this.onInside();
+                break;
+
+            case TaskState.Take:
+                await this.onTake();
+                break;
+
+            case TaskState.Loss:
+                await this.onLoss();
+                break;
+
+            default:
+                throw new Error(`Invalid task state in loop - ${this.task.state}`);
+        }
+    }
+
+    protected async onTake(): Promise<void> {
+        await this.normalize();
+    }
+    protected async onLoss(): Promise<void> {
+        await this.normalize();
+    }
+
+    protected async normalize(): Promise<void> {
+        if (this.task.disableNormalizing) {
+            return;
+        }
+
+        // TODO -
+    }
+
     protected async stopLoop(): Promise<void> {
         this.isStopLoopCalled = true;
 
@@ -99,5 +143,6 @@ export abstract class BWorker {
 
     protected abstract async placeInitOrders(): Promise<void>;
     protected abstract async removeInitOrders(): Promise<void>;
-    protected abstract async loop(): Promise<void>;
+    protected abstract async onWaiting(): Promise<void>;
+    protected abstract async onInside(): Promise<void>;
 }

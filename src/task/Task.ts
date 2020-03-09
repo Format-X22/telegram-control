@@ -8,15 +8,15 @@ export enum TaskState {
     Destroyed,
     Critical,
     Waiting,
-    Normalizing,
+    Inside,
     Take,
     Loss,
 }
 
-export type TTask = {
+export class Task {
     id: number;
     state: TaskState;
-    workerClass: new (task: TTask, telegram: Telegram) => TWorker;
+    workerClass: new (task: Task, telegram: Telegram) => TWorker;
     worker: TWorker;
     stockClass: new () => TStock;
     stock: TStock;
@@ -28,5 +28,6 @@ export type TTask = {
     isLong: boolean;
     stopAmount: number;
     exitAmount: number;
+    disableNormalizing: boolean;
     lastError: string;
-};
+}
