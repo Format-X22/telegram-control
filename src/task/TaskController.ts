@@ -1,4 +1,4 @@
-import { TTask } from './TTask';
+import { TaskState, TTask } from './TTask';
 import { stocks, workers } from '../data/config';
 import { Bart } from '../workers/Bart';
 import { Zigzag } from '../workers/Zigzag';
@@ -64,7 +64,7 @@ export class TaskController {
 
         return {
             id: lastTaskId++,
-            state: 'CONSTRUCT',
+            state: TaskState.Constructed,
             workerClass,
             worker: null,
             stockClass,

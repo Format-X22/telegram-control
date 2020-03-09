@@ -1,6 +1,6 @@
 import * as request from 'request-promise-native';
 import { config } from '../data/config';
-import { TTask } from '../task/TTask';
+import { TaskState, TTask } from '../task/TTask';
 import { Zigzag } from './Zigzag';
 import { Spike } from './Spike';
 import { Bart } from './Bart';
@@ -30,7 +30,7 @@ export abstract class BWorker {
             return;
         }
 
-        this.task.state = 'INIT';
+        this.task.state = TaskState.Init;
 
         this.startLoop();
     }
@@ -38,13 +38,13 @@ export abstract class BWorker {
     async stop(): Promise<void> {
         await this.stopLoop();
 
-        if (this.task.state === 'INIT') {
+        if (this.task.state === TaskState.Init) {
             await this.removeInitOrders();
         } else {
             await this.telegram.send('Cant full destroy - task not in INIT state');
         }
 
-        this.task.state = 'DESTROYED';
+        this.task.state = TaskState.Destroyed;
     }
 
     protected startLoop(): void {
@@ -68,7 +68,7 @@ export abstract class BWorker {
 
                     this.telegram.send(`Critical error: ${String(error)}`).catch();
                     this.alertCall().catch();
-                    this.task.state = 'ERROR';
+                    this.task.state = TaskState.Critical;
                 }
             );
         }, LOOP_TIMEOUT);

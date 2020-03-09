@@ -2,9 +2,20 @@ import { TWorker } from '../workers/Worker';
 import { TStock } from '../stock/Stock';
 import { Telegram } from '../Telegram';
 
+export enum TaskState {
+    Constructed,
+    Init,
+    Destroyed,
+    Critical,
+    Waiting,
+    Normalizing,
+    Take,
+    Loss,
+}
+
 export type TTask = {
     id: number;
-    state: 'CONSTRUCT' | 'INIT' | 'DESTROYED' | 'ERROR';
+    state: TaskState;
     workerClass: new (task: TTask, telegram: Telegram) => TWorker;
     worker: TWorker;
     stockClass: new () => TStock;
