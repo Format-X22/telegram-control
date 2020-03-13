@@ -20,6 +20,7 @@ export abstract class BWorker {
     protected enterOrderId: TStockOrderId;
     protected takeOrderId: TStockOrderId;
     protected stopOrderId: TStockOrderId;
+    protected safeLineOrderId: TStockOrderId;
 
     private isLoopInProgress: boolean = false;
     private isStopLoopCalled: boolean = false;
@@ -141,6 +142,11 @@ export abstract class BWorker {
                 param: '20,10,3',
             },
         });
+    }
+
+    protected fullCandlesAfterStart(): number {
+        // TODO -
+        return 0;
     }
 
     protected abstract async placeInitOrders(): Promise<void>;

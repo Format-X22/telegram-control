@@ -50,14 +50,16 @@ export class TaskController {
         const amount: number = Number(data[1]);
         const enter: number = Number(data[2]);
         const stop: number = Number(data[3]);
-        const disableNormalizing: string = String(data[4]).toLowerCase();
+        const size: Task['size'] = String(data[4]).toLowerCase() as Task['size'];
+        const disableNormalizing: boolean = Boolean(data[5]);
         const workerClass: new () => TWorker = workers[workerName];
         const stockClass: new () => TStock = stocks[stockName];
 
         if (
             !workerClass ||
             !stockClass ||
-            [amount, enter, stop].some((v: number): boolean => !Number.isFinite(v))
+            [amount, enter, stop].some((v: number): boolean => !Number.isFinite(v)) ||
+            !['5m', '15m', '1h', '4h'].includes(size)
         ) {
             return null;
         }
@@ -72,7 +74,8 @@ export class TaskController {
         task.enter = enter;
         task.stop = stop;
         task.isLong = stop < enter;
-        task.disableNormalizing = Boolean(disableNormalizing);
+        task.size = size;
+        task.disableNormalizing = disableNormalizing;
 
         return task;
     }
@@ -92,8 +95,6 @@ export class TaskController {
         } else {
             return null;
         }
-
-        // TODO Spike invert calc
 
         if (task.isLong) {
             task.takeAmount = Math.round(

@@ -23,11 +23,16 @@ export class Task {
     amount: number;
     enter: number;
     stop: number;
+    safe: number;
     takeTrigger: number;
     take: number;
     isLong: boolean;
     stopAmount: number;
     takeAmount: number;
+    safeAmount: number;
+    size: '5m' | '15m' | '1h' | '4h';
+    enterTime: Date;
+    exitTime: Date;
     disableNormalizing: boolean;
     lastError: string;
 }
