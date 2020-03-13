@@ -2,7 +2,6 @@ import * as request from 'request-promise-native';
 import { config } from '../data/config';
 import { TaskState, Task } from '../task/Task';
 import { Zigzag } from './Zigzag';
-import { Spike } from './Spike';
 import { Bart } from './Bart';
 import { EventLoop } from '../utils/EventLoop';
 import { Telegram } from '../Telegram';
@@ -12,7 +11,7 @@ export interface IWorker {
     stop(): Promise<void>;
 }
 
-export type TWorker = Zigzag | Bart | Spike;
+export type TWorker = Zigzag | Bart;
 
 const LOOP_TIMEOUT: number = 3000;
 
