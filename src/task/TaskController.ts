@@ -80,6 +80,8 @@ export class TaskController {
         return task;
     }
 
+    // TODO Move to workers
+    // TODO Calc safe
     private calcTask(task: Task): Task {
         if (task.workerClass === Bart) {
             task.take = Math.round(
