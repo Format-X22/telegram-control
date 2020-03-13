@@ -5,6 +5,7 @@ import { Zigzag } from './Zigzag';
 import { Bart } from './Bart';
 import { EventLoop } from '../utils/EventLoop';
 import { Telegram } from '../Telegram';
+import { TStockOrderId } from '../stock/Stock';
 
 export interface IWorker {
     start(): Promise<void>;
@@ -16,6 +17,10 @@ export type TWorker = Zigzag | Bart;
 const LOOP_TIMEOUT: number = 3000;
 
 export abstract class BWorker {
+    protected enterOrderId: TStockOrderId;
+    protected takeOrderId: TStockOrderId;
+    protected stopOrderId: TStockOrderId;
+
     private isLoopInProgress: boolean = false;
     private isStopLoopCalled: boolean = false;
 

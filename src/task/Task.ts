@@ -23,11 +23,11 @@ export class Task {
     amount: number;
     enter: number;
     stop: number;
-    exitTrigger: number;
-    exit: number;
+    takeTrigger: number;
+    take: number;
     isLong: boolean;
     stopAmount: number;
-    exitAmount: number;
+    takeAmount: number;
     disableNormalizing: boolean;
     lastError: string;
 }

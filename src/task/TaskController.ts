@@ -79,14 +79,14 @@ export class TaskController {
 
     private calcTask(task: Task): Task {
         if (task.workerClass === Bart) {
-            task.exit = Math.round(
+            task.take = Math.round(
                 task.enter * (1 - (task.stop / task.enter - 1) * BART_TAKE_DISTANCE)
             );
             task.stop = Math.round(
                 task.enter * (1 - (task.stop / task.enter - 1) * BART_STOP_DISTANCE)
             );
         } else if (task.workerClass === Zigzag) {
-            task.exit = Math.round(
+            task.take = Math.round(
                 task.enter * (1 - (task.stop / task.enter - 1) * ZIGZAG_DISTANCE)
             );
         } else {
@@ -96,26 +96,26 @@ export class TaskController {
         // TODO Spike invert calc
 
         if (task.isLong) {
-            task.exitAmount = Math.round(
-                -task.amount * (task.exit / task.enter - BAD_MOVE_PERCENT / 100)
+            task.takeAmount = Math.round(
+                -task.amount * (task.take / task.enter - BAD_MOVE_PERCENT / 100)
             );
             task.stopAmount = Math.round(
                 -task.amount * (2 - (task.enter / task.stop + BAD_MOVE_PERCENT / 100))
             );
 
             task.enter = Math.round(task.enter * (1 + ENTER_SAFE_MARGIN_PERCENT / 100));
-            task.exitTrigger = Math.round(task.exit * (1 - EXIT_TRIGGER_MARGIN_PERCENT / 100));
+            task.takeTrigger = Math.round(task.take * (1 - EXIT_TRIGGER_MARGIN_PERCENT / 100));
         } else {
             task.amount = Math.round(-task.amount);
-            task.exitAmount = Math.round(
-                -task.amount * (task.exit / task.enter + BAD_MOVE_PERCENT / 100)
+            task.takeAmount = Math.round(
+                -task.amount * (task.take / task.enter + BAD_MOVE_PERCENT / 100)
             );
             task.stopAmount = Math.round(
                 -task.amount * (2 - (task.enter / task.stop - BAD_MOVE_PERCENT / 100))
             );
 
             task.enter = Math.round(task.enter * (1 - ENTER_SAFE_MARGIN_PERCENT / 100));
-            task.exitTrigger = Math.round(task.exit * (1 + EXIT_TRIGGER_MARGIN_PERCENT / 100));
+            task.takeTrigger = Math.round(task.take * (1 + EXIT_TRIGGER_MARGIN_PERCENT / 100));
         }
 
         return task;
