@@ -1,10 +1,15 @@
 import { IWorker } from './Worker';
 import { IStock, StockByName, TStock, TStockOrderId } from '../stock/Stock';
 import { Collection } from './Collection';
+import { PhoneCall } from '../utils/PhoneCall';
+import { EventLoop } from '../utils/EventLoop';
 
 const MAX_ORDER_SIZE: number = 300_000;
+const ITERATION_SLEEP_TIMEOUT: number = 3_000;
 
 export class Stop implements IWorker {
+    public lastStockError: string;
+
     private amount: number;
     private triggerPrice: number;
     private enterPrice: number;
@@ -14,8 +19,10 @@ export class Stop implements IWorker {
     private triggerOrder: TStockOrderId;
     private enterOrder: TStockOrderId;
     private cancelOrder: TStockOrderId;
-
-    public lastStockError: string;
+    private inPosition: boolean = false;
+    private canceled: boolean = false;
+    private done: boolean = false;
+    private inIteration: boolean = false;
 
     public init(params: Array<string>): boolean {
         try {
@@ -40,28 +47,40 @@ export class Stop implements IWorker {
 
         this.triggerOrder = await this.stock.placeLimitOrder(this.triggerPrice, triggerAmount);
 
-        this.loop();
+        if (this.cancelPrice) {
+            this.cancelOrder = await this.stock.placeLimitOrder(this.cancelPrice, triggerAmount);
+        }
+
+        this.loop().catch((): void => void PhoneCall.doCall('Loop error'));
     }
 
     public async status(): Promise<string> {
         let status: string = '';
 
-        if (await this.stock.hasOrder(this.triggerOrder)) {
-            status += `Wait for trigger on ${this.triggerPrice}.`;
+        if (this.canceled) {
+            status += 'Canceled!';
+        } else if (this.done) {
+            status += 'Task done!';
         } else {
-            status += `Active and wait for execution on ${this.enterPrice}`;
+            if (await this.stock.hasOrder(this.triggerOrder)) {
+                status += `Wait for trigger on ${this.triggerPrice}.`;
+            } else {
+                status += `Active and wait for execution on ${this.enterPrice}`;
 
-            if (this.cancelPrice) {
-                status += ` or cancel on ${this.cancelPrice}`;
+                if (this.cancelPrice) {
+                    status += ` or cancel on ${this.cancelPrice}`;
+                }
+
+                status += '.';
             }
-
-            status += '.';
         }
 
         return status;
     }
 
     public async cancel(force: boolean): Promise<boolean> {
+        this.canceled = true;
+
         if (force) {
             try {
                 await this.stock.hardStop();
@@ -72,12 +91,21 @@ export class Stop implements IWorker {
             return false;
         }
 
+        while (this.inIteration) {
+            await EventLoop.sleep(ITERATION_SLEEP_TIMEOUT / 100);
+        }
+
+        if (await this.stock.hasOrder(this.enterOrder)) {
+            await this.stock.cancelOrder(this.enterOrder);
+        }
+
         if (await this.stock.hasOrder(this.triggerOrder)) {
             await this.stock.cancelOrder(this.triggerOrder);
         }
 
-        // TODO Cancel orders
-        // TODO Stop loop
+        if (await this.stock.hasOrder(this.cancelOrder)) {
+            await this.stock.cancelOrder(this.cancelOrder);
+        }
 
         return true;
     }
@@ -125,14 +153,41 @@ export class Stop implements IWorker {
         this.cancelPrice = Number(commands.get('cancel')) || false;
     }
 
-    // TODO -
-    private loop(): void {
-        // TODO Try iteration, do nothing on hardStop
+    private async loop(): Promise<void> {
+        while (!this.canceled && !this.done) {
+            this.inIteration = true;
+            await this.iteration();
+            this.inIteration = false;
+            await EventLoop.sleep(ITERATION_SLEEP_TIMEOUT);
+        }
+    }
 
-        if (this.stock.hasOrder(this.triggerOrder)) {
-            console.log(true);
-        } else {
-            console.log(false);
+    private async iteration(): Promise<void> {
+        if (await this.stock.hasOrder(this.triggerOrder)) {
+            return;
+        }
+
+        if (!this.inPosition) {
+            this.enterOrder = await this.stock.placeStopMarketOrder(this.enterPrice, this.amount);
+            this.inPosition = true;
+            return;
+        }
+
+        if (this.cancelPrice && !(await this.stock.hasOrder(this.cancelOrder))) {
+            await this.stock.cancelOrder(this.enterOrder);
+            this.done = true;
+
+            return;
+        }
+
+        if (!(await this.stock.hasOrder(this.enterOrder))) {
+            if (this.cancelPrice) {
+                await this.stock.cancelOrder(this.cancelOrder);
+            }
+
+            this.done = true;
+
+            await PhoneCall.doCall('Stop triggered');
         }
     }
 }
