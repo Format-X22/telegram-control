@@ -25,6 +25,7 @@ export interface IStock {
     placeTakeMarketOrder(trigger: TStockPrice, value: TStockValue): Promise<TStockOrderId>;
     cancelOrder(orderID: TStockOrderId): Promise<void>;
     hasOrder(orderID: TStockOrderId): Promise<boolean>;
+    hardStop(): Promise<void>;
 }
 
 export type TStock = typeof Bitmex | typeof Binance;

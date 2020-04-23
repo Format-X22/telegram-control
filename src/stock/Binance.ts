@@ -62,4 +62,9 @@ export class Binance implements IStock {
         // TODO -
         return;
     }
+
+    async hardStop(): Promise<void> {
+        // TODO -
+        return;
+    }
 }

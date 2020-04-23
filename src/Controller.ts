@@ -43,12 +43,21 @@ export class Controller {
     }
 
     public async status(): Promise<void> {
-        // TODO Explain
-        await this.telegram.send('TODO');
+        let messageLines: Array<string> = [];
+
+        for (const [id, worker] of this.workers) {
+            messageLines.push(`Id: ${id}`);
+            messageLines.push(`Status:\n${await worker.status()}`);
+            messageLines.push(`Last stock error: ${worker.lastStockError}`);
+            messageLines.push('\n');
+        }
+
+        await this.telegram.send(messageLines.join('\n') || 'No any tasks');
     }
 
     public async cancel(data: Array<string>): Promise<void> {
         const id: number = Number(data[0]);
+        const force: boolean = Boolean(data[1]);
 
         if (!Number.isFinite(id) || id === 0) {
             await this.telegram.send('Invalid params');
@@ -62,7 +71,18 @@ export class Controller {
             return;
         }
 
-        // TODO Cancel
+        try {
+            const result: boolean = await worker.cancel(force);
+
+            if (!result) {
+                await this.telegram.send('Cant do safe cancel');
+            }
+        } catch (error) {
+            await this.telegram.send('Error on cancel task');
+            return;
+        }
+
+        this.workers.delete(id);
 
         await this.status();
     }

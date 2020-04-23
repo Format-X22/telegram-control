@@ -52,6 +52,7 @@ export class Bitmex implements IStock {
     private readonly publicKey: string;
     private readonly privateKey: string;
     private readonly orders: TOrders = new Map<TStockOrderId, TBitmexOrderId>();
+    private isHardStop: boolean = false;
 
     constructor(private worker: IWorker) {
         this.publicKey = config.bitmexPublicKey;
@@ -188,6 +189,10 @@ export class Bitmex implements IStock {
         return ids.includes(orderId);
     }
 
+    async hardStop(): Promise<void> {
+        this.isHardStop = true;
+    }
+
     private async placeOrder(params: TOrder): Promise<TStockOrderId> {
         const order: TOrder = await this.request<TOrder>({
             point: 'order',
@@ -218,7 +223,7 @@ export class Bitmex implements IStock {
     }
 
     private async request<T>(args: TRequestOptions): Promise<T> {
-        while (true) {
+        while (!this.isHardStop) {
             try {
                 return await this.tryRequest<T>(args);
             } catch (error) {
@@ -230,6 +235,8 @@ export class Bitmex implements IStock {
                 await EventLoop.sleep(REQUEST_RETRY_SLEEP);
             }
         }
+
+        throw new Error('Hard stop');
     }
 
     private async tryRequest<T>({ point, method, params }: TRequestOptions): Promise<T> {

@@ -14,7 +14,7 @@
       "array-destructuring"
     ],
     "quotemark": [true, "single"],
-    "no-magic-numbers": [true, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 100],
+    "no-magic-numbers": [true, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 100],
     "strict-type-predicates": true,
     "no-shadowed-variable": true,
     "restrict-plus-operands": true
