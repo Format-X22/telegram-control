@@ -3,7 +3,7 @@ import * as request from 'request-promise-native';
 import { EventLoop } from '../utils/EventLoop';
 import { config } from '../data/config';
 import { IStock, TStockLeverage, TStockOrderId, TStockPrice, TStockValue } from './Stock';
-import { Task } from '../task/Task';
+import { IWorker } from '../workers/Worker';
 
 type TBitmexOrderId = string;
 type TOrder = {
@@ -53,7 +53,7 @@ export class Bitmex implements IStock {
     private readonly privateKey: string;
     private readonly orders: TOrders = new Map<TStockOrderId, TBitmexOrderId>();
 
-    constructor(private task: Task) {
+    constructor(private worker: IWorker) {
         this.publicKey = config.bitmexPublicKey;
         this.privateKey = config.bitmexPrivateKey;
     }
@@ -174,7 +174,7 @@ export class Bitmex implements IStock {
         if (!Array.isArray(orders) || orders.length < 0) {
             console.error(orders);
 
-            this.task.lastError = JSON.stringify(orders, null, 2);
+            this.worker.lastStockError = JSON.stringify(orders, null, 2);
 
             return await this.cancelOrder(orderId);
         }
@@ -198,7 +198,7 @@ export class Bitmex implements IStock {
         if (!order.orderID) {
             console.error(order);
 
-            this.task.lastError = JSON.stringify(order, null, 2);
+            this.worker.lastStockError = JSON.stringify(order, null, 2);
 
             return await this.placeOrder(params);
         }
@@ -225,7 +225,7 @@ export class Bitmex implements IStock {
                 const now: Date = new Date();
 
                 console.log(now, error);
-                this.task.lastError = `${now} :: ${error.message}`;
+                this.worker.lastStockError = `${now} :: ${error.message}`;
 
                 await EventLoop.sleep(REQUEST_RETRY_SLEEP);
             }

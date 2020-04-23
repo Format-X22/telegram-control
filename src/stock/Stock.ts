@@ -27,4 +27,8 @@ export interface IStock {
     hasOrder(orderID: TStockOrderId): Promise<boolean>;
 }
 
-export type TStock = Bitmex | Binance;
+export type TStock = typeof Bitmex | typeof Binance;
+export const StockByName: object = {
+    [Bitmex.name.toLowerCase()]: Bitmex,
+    [Binance.name.toLowerCase()]: Binance,
+};

@@ -1,17 +1,17 @@
 import * as TelegramBot from 'node-telegram-bot-api';
 import { config } from './data/config';
 
-import { TaskController } from './task/TaskController';
+import { Controller } from './Controller';
 
 export class Telegram {
     private bot: TelegramBot;
-    private taskController: TaskController;
+    private controller: Controller;
 
     constructor() {
         this.bot = new TelegramBot(config.telegramKey, { polling: true });
 
         this.bot.on('text', this.handleText.bind(this));
-        this.taskController = new TaskController(this);
+        this.controller = new Controller(this);
 
         this.send('Started!').catch((error: Error): void => {
             console.error(error);
@@ -25,32 +25,26 @@ export class Telegram {
 
     private async handleText(message: { chat: { id: number }; text: string }): Promise<void> {
         const id: number = message.chat.id;
-        const [command, ...data]: string[] = message.text.split(/ +/);
 
         if (id !== config.telegramBotOwner) {
             await this.send('Just private use only.', id);
             return;
         }
 
-        await this.route(command, data);
-    }
+        const text: string = message.text.trim();
+        let command: string;
+        let data: Array<string>;
 
-    private async route(command: string, data: string[]): Promise<void> {
-        switch (command) {
-            case '/status':
-                await this.taskController.status();
-                return;
+        try {
+            const tokens: Array<string> = text.split(/ +/);
 
-            case '/bart':
-            case '/zigzag':
-                await this.taskController.handleTask(command.slice(1), data);
-                return;
-
-            case '/cancel':
-                await this.taskController.cancel(data);
-                return;
+            command = tokens[0].toLowerCase();
+            data = tokens.slice(1).map((token: string): string => token.toLowerCase());
+        } catch (error) {
+            await this.send('Invalid command.', id);
+            return;
         }
 
-        await this.send('Unknown command');
+        await this.controller.route(command, data);
     }
 }
