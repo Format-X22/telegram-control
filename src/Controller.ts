@@ -47,7 +47,7 @@ export class Controller {
 
         for (const [id, worker] of this.workers) {
             messageLines.push(`Id: ${id}`);
-            messageLines.push(`Status:\n${await worker.status()}`);
+            messageLines.push(`Status: ${await worker.status()}`);
             messageLines.push(`Last stock error: ${worker.lastStockError || 'None'}`);
             messageLines.push('\n');
         }

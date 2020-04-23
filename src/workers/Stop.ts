@@ -7,6 +7,11 @@ import { EventLoop } from '../utils/EventLoop';
 const MAX_ORDER_SIZE: number = 300_000;
 const ITERATION_SLEEP_TIMEOUT: number = 3_000;
 
+enum Sides {
+    long = 'long',
+    short = 'short',
+}
+
 export class Stop implements IWorker {
     public lastStockError: string;
 
@@ -14,6 +19,7 @@ export class Stop implements IWorker {
     private triggerPrice: number;
     private enterPrice: number;
     private cancelPrice: number | false;
+    private side: string;
 
     private stock: IStock;
     private triggerOrder: TStockOrderId;
@@ -31,6 +37,10 @@ export class Stop implements IWorker {
             }
         } catch (error) {
             return false;
+        }
+
+        if (this.side === Sides.short) {
+            this.amount = -this.amount;
         }
 
         return true;
@@ -141,6 +151,10 @@ export class Stop implements IWorker {
             return false;
         }
 
+        if (!Sides[this.side]) {
+            return false;
+        }
+
         return true;
     }
 
@@ -151,6 +165,7 @@ export class Stop implements IWorker {
         this.triggerPrice = Number(commands.get('trigger'));
         this.enterPrice = Number(commands.get('enter'));
         this.cancelPrice = Number(commands.get('cancel')) || false;
+        this.side = commands.get('side');
     }
 
     private async loop(): Promise<void> {
