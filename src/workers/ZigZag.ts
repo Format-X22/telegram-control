@@ -28,7 +28,12 @@ export class ZigZag implements IWorker {
         return [
             'Call signature:',
             '',
+            'command:',
+            '',
             'zigzag',
+            '',
+            'arguments:',
+            '',
             'stock {name}',
             'side {long/short}',
             'stop-price {int}',
