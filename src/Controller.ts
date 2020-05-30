@@ -1,11 +1,6 @@
 import { Telegram } from './Telegram';
 import { IWorker } from './workers/Worker';
 import { Stop } from './workers/Stop';
-import {
-    FibonacciCalc,
-    TFibonacciCommands,
-    TFibonacciStrategyConfig,
-} from './workers/FibonacciCalc';
 
 let lastTaskId: number = 0;
 
@@ -26,19 +21,6 @@ export class Controller {
 
             case 'cancel':
                 await this.cancel(data);
-                return;
-
-            case 'calc':
-                switch (data[0]) {
-                    case 'fib':
-                    case 'fiba':
-                    case 'fibonacci':
-                        await this.calcFib(data.slice(1));
-                        break;
-
-                    default:
-                        await this.telegram.send('Unknown calc type');
-                }
                 return;
 
             default:
@@ -103,18 +85,5 @@ export class Controller {
         this.workers.delete(id);
 
         await this.status();
-    }
-
-    public async calcFib(data: Array<string>): Promise<void> {
-        const parsedCommands: TFibonacciCommands = FibonacciCalc.parseCommands(data);
-
-        if (!parsedCommands) {
-            await this.telegram.send('Invalid params');
-            return;
-        }
-
-        const result: TFibonacciStrategyConfig = FibonacciCalc.calcByLevel(parsedCommands);
-
-        await this.telegram.send(JSON.stringify(result, null, 2));
     }
 }
