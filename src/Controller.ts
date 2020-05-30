@@ -1,6 +1,7 @@
 import { Telegram } from './Telegram';
 import { IWorker } from './workers/Worker';
 import { Stop } from './workers/Stop';
+import { ZigZag } from './workers/ZigZag';
 
 let lastTaskId: number = 0;
 
@@ -15,9 +16,19 @@ export class Controller {
                 await this.status();
                 return;
 
-            // amount, trigger, enter, side, [cancel]
+            // <stock_name>, side <long/short>
+            // amount <int>, trigger <int>, enter <int>, [cancel] <int>
             case 'stop':
                 await this.makeStopTask(data);
+                return;
+
+            // stock <name>, side <long/short>
+            // stop-price <int>, stop-amount <int>
+            // enter-price <int>, enter-trigger <int>, enter-amount <int>
+            // take-price <int>, take-trigger <int>, take-amount <int>
+            // candle-call <time_like: 4h>
+            case 'zigzag':
+                await this.makeZigZagTask(data);
                 return;
 
             case 'cancel':
@@ -31,6 +42,20 @@ export class Controller {
 
     private async makeStopTask(data: Array<string>): Promise<void> {
         const worker: Stop = new Stop();
+
+        if (!worker.init(data)) {
+            await this.telegram.send('Invalid params');
+            return;
+        }
+
+        this.workers.set(++lastTaskId, worker);
+
+        await worker.start();
+        await this.status();
+    }
+
+    private async makeZigZagTask(data: Array<string>): Promise<void> {
+        const worker: ZigZag = new ZigZag();
 
         if (!worker.init(data)) {
             await this.telegram.send('Invalid params');
