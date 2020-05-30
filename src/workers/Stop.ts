@@ -121,6 +121,7 @@ export class Stop implements IWorker {
         return [
             'Call signature:',
             '',
+            '{stock_name}',
             'stop {stock_name}',
             'side {long/short}',
             'amount {int}',
