@@ -117,6 +117,23 @@ export class Stop implements IWorker {
         return true;
     }
 
+    public helpMessageString(): string {
+        return [
+            'Call signature:',
+            '',
+            'stop {stock_name}',
+            'side {long/short}',
+            'amount {int}',
+            'trigger {int}',
+            'enter {int}',
+            '[cancel] {boolean}',
+            '',
+            'Hints:',
+            '',
+            'side short => stop order is short',
+        ].join('\n');
+    }
+
     private makeStockClient(stockName: string): boolean {
         const stock: TStock | undefined = StockByName[stockName];
 

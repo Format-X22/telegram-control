@@ -23,4 +23,22 @@ export class ZigZag implements IWorker {
         // TODO -
         return true;
     }
+
+    public helpMessageString(): string {
+        return [
+            'Call signature:',
+            '',
+            'stock {name}',
+            'side {long/short}',
+            'stop-price {int}',
+            'stop-amount {int}',
+            'enter-price {int}',
+            'enter-trigger {int}',
+            'enter-amount {int}',
+            'take-price {int}',
+            'take-trigger {int}',
+            'take-amount {int}',
+            'candle-call {time_like: 4h}, default: 4h',
+        ].join('\n');
+    }
 }

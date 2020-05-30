@@ -16,23 +16,20 @@ export class Controller {
                 await this.status();
                 return;
 
-            // <stock_name>, side <long/short>
-            // amount <int>, trigger <int>, enter <int>, [cancel] <int>
             case 'stop':
                 await this.makeStopTask(data);
                 return;
 
-            // stock <name>, side <long/short>
-            // stop-price <int>, stop-amount <int>
-            // enter-price <int>, enter-trigger <int>, enter-amount <int>
-            // take-price <int>, take-trigger <int>, take-amount <int>
-            // candle-call <time_like: 4h>
             case 'zigzag':
                 await this.makeZigZagTask(data);
                 return;
 
             case 'cancel':
                 await this.cancel(data);
+                return;
+
+            case 'help':
+                await this.showHelp();
                 return;
 
             default:
@@ -111,5 +108,26 @@ export class Controller {
         this.workers.delete(id);
 
         await this.status();
+    }
+
+    private async showHelp(): Promise<void> {
+        await this.telegram.send(
+            [
+                // Lines
+                this.helpWrap(Stop),
+                this.helpWrap(ZigZag),
+            ].join('\n')
+        );
+    }
+
+    private helpWrap(Class: typeof Stop | typeof ZigZag): string {
+        return [
+            // Lines
+            `"${Class.name}" worker help:`,
+            '',
+            Class.prototype.helpMessageString(),
+            '',
+            '******',
+        ].join('\n');
     }
 }
