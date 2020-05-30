@@ -1,16 +1,12 @@
 import { IWorker } from './Worker';
 import { IStock, StockByName, TStock, TStockOrderId } from '../stock/Stock';
-import { Collection } from './Collection';
+import { Collection } from '../utils/Collection';
 import { PhoneCall } from '../utils/PhoneCall';
 import { EventLoop } from '../utils/EventLoop';
+import { Sides } from '../data/dictionary';
 
 const MAX_ORDER_SIZE: number = 300_000;
 const ITERATION_SLEEP_TIMEOUT: number = 3_000;
-
-enum Sides {
-    long = 'long',
-    short = 'short',
-}
 
 export class Stop implements IWorker {
     public lastStockError: string;
