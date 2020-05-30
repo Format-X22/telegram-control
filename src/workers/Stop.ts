@@ -7,6 +7,7 @@ import { Sides } from '../data/dictionary';
 
 const MAX_ORDER_SIZE: number = 300_000;
 const ITERATION_SLEEP_TIMEOUT: number = 3_000;
+const TRIGGER_POSITION_SIZE: number = 50;
 
 export class Stop implements IWorker {
     public lastStockError: string;
@@ -46,9 +47,9 @@ export class Stop implements IWorker {
         let triggerAmount: number;
 
         if (this.amount > 0) {
-            triggerAmount = 1;
+            triggerAmount = TRIGGER_POSITION_SIZE;
         } else {
-            triggerAmount = -1;
+            triggerAmount = -TRIGGER_POSITION_SIZE;
         }
 
         this.triggerOrder = await this.stock.placeLimitOrder(this.triggerPrice, triggerAmount);

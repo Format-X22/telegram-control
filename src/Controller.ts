@@ -15,6 +15,7 @@ export class Controller {
                 await this.status();
                 return;
 
+            // amount, trigger, enter, side, [cancel]
             case 'stop':
                 await this.makeStopTask(data);
                 return;
