@@ -205,6 +205,8 @@ export class Bitmex implements IStock {
 
             this.worker.lastStockError = JSON.stringify(order, null, 2);
 
+            await EventLoop.sleep(REQUEST_RETRY_SLEEP);
+
             return await this.placeOrder(params);
         }
 
