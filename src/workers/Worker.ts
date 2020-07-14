@@ -4,5 +4,4 @@ export interface IWorker {
     start(): Promise<void>;
     status(): Promise<string>;
     cancel(force: boolean): Promise<boolean>;
-    helpMessageString(): string
 }

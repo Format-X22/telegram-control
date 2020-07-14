@@ -9,7 +9,7 @@ const MAX_ORDER_SIZE: number = 300_000;
 const ITERATION_SLEEP_TIMEOUT: number = 3_000;
 const TRIGGER_POSITION_SIZE: number = 50;
 
-export class Stop implements IWorker {
+export class Order implements IWorker {
     public lastStockError: string;
 
     private amount: number;
@@ -117,30 +117,8 @@ export class Stop implements IWorker {
         return true;
     }
 
-    public helpMessageString(): string {
-        return [
-            'Call signature:',
-            '',
-            'command:',
-            '',
-            'stop {stock_name}',
-            '',
-            'arguments:',
-            '',
-            'side {long/short}',
-            'amount {int}',
-            'trigger {int}',
-            'enter {int}',
-            '[cancel] {int}',
-            '',
-            'Hints:',
-            '',
-            'side short => stop order is short',
-        ].join('\n');
-    }
-
     private makeStockClient(stockName: string): boolean {
-        const stock: TStock | undefined = StockByName[stockName];
+        const stock: TStock = StockByName[stockName];
 
         if (!stock) {
             return false;

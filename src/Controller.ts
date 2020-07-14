@@ -1,6 +1,6 @@
 import { Telegram } from './Telegram';
 import { IWorker } from './workers/Worker';
-import { Stop } from './workers/Stop';
+import { Order } from './workers/Order';
 
 let lastTaskId: number = 0;
 
@@ -11,20 +11,21 @@ export class Controller {
 
     public async route(command: string, data: Array<string>): Promise<void> {
         switch (command) {
+            case '/help':
+            case 'help':
+                await this.showHelp();
+                return;
+
+            case 'order':
+                await this.makeOrderTask(data);
+                return;
+
             case 'status':
                 await this.status();
                 return;
 
-            case 'stop':
-                await this.makeStopTask(data);
-                return;
-
             case 'cancel':
                 await this.cancel(data);
-                return;
-
-            case 'help':
-                await this.showHelp();
                 return;
 
             default:
@@ -32,8 +33,8 @@ export class Controller {
         }
     }
 
-    private async makeStopTask(data: Array<string>): Promise<void> {
-        const worker: Stop = new Stop();
+    private async makeOrderTask(data: Array<string>): Promise<void> {
+        const worker: Order = new Order();
 
         if (!worker.init(data)) {
             await this.telegram.send('Invalid params');
@@ -68,7 +69,7 @@ export class Controller {
             return;
         }
 
-        const worker: IWorker | undefined = this.workers.get(id);
+        const worker: IWorker = this.workers.get(id);
 
         if (!worker) {
             await this.telegram.send('Not found');
@@ -94,20 +95,46 @@ export class Controller {
     private async showHelp(): Promise<void> {
         await this.telegram.send(
             [
-                // Lines
-                this.helpWrap(Stop),
+                'help => print this message',
+                'alias /help',
+                '',
+                'status => show all tasks status',
+                '',
+                'cancel {id} => cancel task by id',
+                '',
+                'cancel {id} force => cancel task by id with force',
+                '',
+                'order {args...} => place order',
+                '',
+                '_____________________________________________________',
+                '',
+                'ORDER call signature:',
+                '',
+                'order {stock_name}',
+                '(bitmex, binance, bybit, huobi, okex)',
+                '',
+                'Arguments:',
+                '',
+                'type {order_type}',
+                '(limit, market, stopLimit, stopMarket, takeLimit, takeMarket)',
+                '',
+                'amount {int}',
+                '',
+                '[price] {int}',
+                '(limit-type only)',
+                '',
+                '[trigger] {int}',
+                '(stop/take-type only)',
+                '',
+                '[up-cancel] {int}',
+                '',
+                '[down-cancel] {int}',
+                '',
+                '[up-activate] {int}',
+                '',
+                '[down-activate] {int}',
+                '',
             ].join('\n')
         );
-    }
-
-    private helpWrap(Class: typeof Stop): string {
-        return [
-            // Lines
-            `"${Class.name}" worker help:`,
-            '',
-            Class.prototype.helpMessageString(),
-            '',
-            '******',
-        ].join('\n');
     }
 }
