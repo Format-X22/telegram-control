@@ -1,7 +1,6 @@
 import { Telegram } from './Telegram';
 import { IWorker } from './workers/Worker';
 import { Stop } from './workers/Stop';
-import { ZigZag } from './workers/ZigZag';
 
 let lastTaskId: number = 0;
 
@@ -20,10 +19,6 @@ export class Controller {
                 await this.makeStopTask(data);
                 return;
 
-            case 'zigzag':
-                await this.makeZigZagTask(data);
-                return;
-
             case 'cancel':
                 await this.cancel(data);
                 return;
@@ -39,20 +34,6 @@ export class Controller {
 
     private async makeStopTask(data: Array<string>): Promise<void> {
         const worker: Stop = new Stop();
-
-        if (!worker.init(data)) {
-            await this.telegram.send('Invalid params');
-            return;
-        }
-
-        this.workers.set(++lastTaskId, worker);
-
-        await worker.start();
-        await this.status();
-    }
-
-    private async makeZigZagTask(data: Array<string>): Promise<void> {
-        const worker: ZigZag = new ZigZag();
 
         if (!worker.init(data)) {
             await this.telegram.send('Invalid params');
@@ -115,12 +96,11 @@ export class Controller {
             [
                 // Lines
                 this.helpWrap(Stop),
-                this.helpWrap(ZigZag),
             ].join('\n')
         );
     }
 
-    private helpWrap(Class: typeof Stop | typeof ZigZag): string {
+    private helpWrap(Class: typeof Stop): string {
         return [
             // Lines
             `"${Class.name}" worker help:`,
